@@ -80,17 +80,42 @@ Input is expected to be a list of dictionaries with 'status' and 'amount'.
 
 ## 1) Code Review Findings
 ### Critical bugs
-- 
+- Original code does not check type, so non-string inputs (None, numbers, lists) will raise TypeError.
+
+- Original code counts any string with "@" — multiple "@", missing local/domain parts, or domains without dots are incorrectly counted.
 
 ### Edge cases & risks
-- 
+- Emails with multiple "@" → incorrectly counted as valid.
+
+- Empty strings → counted as valid incorrectly if they contain "@".
+
+- Missing local part ("@domain.com") → counted incorrectly.
+
+- Missing domain part ("user@") → counted incorrectly.
+
+- Domain without . ("user@localhost" or "w@c") → may not be a realistic email.
+
+- Mixed types in input list → original code crashes.
 
 ### Code quality / design issues
-- 
+- No type hints
+
+- No docstring to explain input/output
+
+- Assumes all inputs are strings → not safe for real-world data
+
+- Simple "@" check is insufficient to capture minimal realistic email validity
 
 ## 2) Proposed Fixes / Improvements
 ### Summary of changes
-- 
+- Added type check to ensure only strings are processed.
+
+- Require exactly one "@".
+
+- Check that local and domain parts are non-empty.
+
+- Require that domain contains at least one . for realistic public emails.
+
 
 ### Corrected code
 See `correct_task2.py`
@@ -101,20 +126,40 @@ See `correct_task2.py`
 ### Testing Considerations
 If you were to test this function, what areas or scenarios would you focus on, and why?
 
+- Empty list → should return 0.(Ensures the function correctly returns 0 without crashing.)
+
+- All invalid strings (numbers, None, missing "@") → should return 0.(to ignore obviously invalid emails.)
+
+- Mixed valid/invalid emails → only valid ones counted.
+
+- Emails with multiple "@" → skipped.
+
+- Emails with missing local or domain part → skipped.
+
+- Emails with domain missing a dot → skipped.
+
+- Normal valid emails ("user@example.com") → counted.
+
 ## 3) Explanation Review & Rewrite
 ### AI-generated explanation (original)
 > This function counts the number of valid email addresses in the input list. It safely ignores invalid entries and handles empty input correctly.
 
 ### Issues in original explanation
-- 
+- Overstates correctness : the original code does not safely ignore invalid entries; it crashes on non-string inputs.
+
+- Simplistic "@" check is not sufficient to determine valid emails.
+
+- Ignores edge cases like missing local/domain parts or domain without a dot.
 
 ### Rewritten explanation
-- 
+- This function counts the number of valid email addresses in a list using a practical validation approach. email is considered valid if it is a string containing exactly one “@” symbol, with a non-empty local part before the “@” and a non-empty domain part after it that includes at least one dot. The function ignores non-string items, emails with multiple “@” symbols, missing local or domain parts, or domains without a dot. It safely handles empty lists and lists containing mixed types, and returns an integer representing the total number of valid emails.
 
 ## 4) Final Judgment
-- Decision: Approve / Request Changes / Reject
-- Justification:
-- Confidence & unknowns:
+- Decision: Request Changes / Approve with Improvements
+
+- Justification: The original code does not safely handle non-strings, missing parts, multiple "@", or domains without a dot. Minimal improvements are needed to ensure correct counting.
+
+- Confidence & unknowns: High confidence
 
 ---
 
