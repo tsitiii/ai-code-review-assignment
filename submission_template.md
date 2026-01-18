@@ -1,8 +1,8 @@
 # AI Code Review Assignment (Python)
 
 ## Candidate
-- Name:
-- Approximate time spent:
+- Name: Tsiyon Gashaw
+- Approximate time spent: 70 minutes
 
 ---
 
